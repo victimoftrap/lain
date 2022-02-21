@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+    "name": "lain",
+    "description": "serial experiments lain",
+    "version": "0.0.1",
+    "author": "victimoftrap",
+    "permissions": [
+        "tabs",
+        "activeTab", 
+        "background",
+        "http://localhost:5000/*",
+        "http://217.71.129.139:4216/api"
+    ],
+    "background": {
+        "scripts": ["lain-background.js"]
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://docs.google.com/forms/*"],
+            "js": ["lain-content.js"]
+        }
+    ]
+}

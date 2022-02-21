@@ -1,0 +1,22 @@
+{
+  "name": "lain",
+  "version": "1.0.0",
+  "description": "serial experiments lain",
+  "scripts": {
+    "build": "webpack --bail"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "babel-loader": "^8.2.1",
+    "nanoid": "^3.3.1",
+    "webpack": "^5.69.1",
+    "webpack-cli": "^4.2.0",
+    "webpack-extension-reloader": "^1.1.4"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^6.3.1"
+  }
+}
