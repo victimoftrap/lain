@@ -189,7 +189,7 @@ const abobaExtractor = (testSessionId, testId) => {
 
 const getUserId = () => {
     let testSessionId = localStorage.getItem(USER_SESSION_ID);
-    
+
     if (testSessionId === null) {
         testSessionId = nanoid();
         localStorage.setItem(USER_SESSION_ID, testSessionId);
@@ -198,7 +198,7 @@ const getUserId = () => {
 };
 
 const getFormId = () => {
-    const formActionUrl = location.pathname;
+    const formActionUrl = document.getElementsByTagName('form')[0].action;
     const pathList = formActionUrl.split('/');
     return pathList[pathList.length - 2];
 };
