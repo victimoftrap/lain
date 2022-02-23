@@ -1,17 +1,17 @@
+'use strict';
+
 import { APP_STATES } from './appStates'
 import { USER_EVENTS } from './userEvents'
 
 const getServerUrl = (isLocal) => {
-    const LOCAL_API_URL = 'http://localhost:5000/api';
-    const SERVER_API_URL = 'http://217.71.129.139:4216/api';
+    const LOCAL_API_URL = 'http://localhost:5000';
+    const SERVER_API_URL = 'http://217.71.129.139:4223';
 
-    let WORKING_SERVER_URL = LOCAL_API_URL;
     if (isLocal) {
-        WORKING_SERVER_URL = LOCAL_API_URL;
+        return LOCAL_API_URL;
     } else {
-        WORKING_SERVER_URL = SERVER_API_URL;
+        return SERVER_API_URL;
     }
-    return `${WORKING_SERVER_URL}/events/save`;
 };
 
 const logEventMessage = (message) => {
@@ -19,6 +19,7 @@ const logEventMessage = (message) => {
 };
 
 const sendEventMessageToServer = (message) => {
+    const apiUrl = getServerUrl(false);
     const request = {
         method: 'POST',
         headers: {
@@ -26,8 +27,9 @@ const sendEventMessageToServer = (message) => {
         },
         body: JSON.stringify(message),
     };
+
     logEventMessage(message);
-    fetch(getServerUrl(false), request);
+    fetch(`${apiUrl}/events/save`, request);
 };
 
 const onCreatedTab = (tab) => {
@@ -109,6 +111,38 @@ const handleMessage = (message) => {
             break;
     }
 };
+
+chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    
+});
+
+const getTestLinks = async () => {
+    const apiUrl = getServerUrl(false);
+    return fetch(`${apiUrl}/links`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+};
+
+const sendResponseAsMessage = async (sendResponse) => {
+    // https://stackoverflow.com/questions/14094447/chrome-extension-dealing-with-asynchronous-sendmessage
+    const httpResponse = await getTestLinks();
+    const response = await httpResponse.json();
+
+    sendResponse({
+        testLinks: response
+    });
+    localStorage.setItem('links', JSON.stringify(response));
+};
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.greeting === "hello") {
+        sendResponseAsMessage(sendResponse);
+        return true;
+    }
+});
 
 chrome.runtime.onConnect.addListener(port => {
     if (port.name === 'aboba-gforms') {

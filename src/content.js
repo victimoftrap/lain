@@ -1,3 +1,5 @@
+'use strict';
+
 import { APP_STATES } from './appStates'
 import { USER_EVENTS } from './userEvents'
 
@@ -200,6 +202,14 @@ const getFormId = () => {
     return pathList[pathList.length - 2];
 };
 
+const injectAll = (testSessionId, testId) => {
+    injectMouseListeners(testSessionId, testId);
+    abobaExtractor(testSessionId, testId);
+    sendForm(testSessionId, testId);
+    preClearForm(testSessionId, testId);
+    clearForm(testSessionId, testId);
+};
+
 const start = () => {
     const testSessionId = getUserId();
     const testId = getFormId();
@@ -212,6 +222,7 @@ const start = () => {
         },
     });
     localStorage.setItem(EXTENSION_STATE, APP_STATES.START_TRACKING);
+    injectAll(testSessionId, testId);
 };
 
 const stop = () => {
@@ -251,20 +262,27 @@ const checkAppState = () => {
     }
 
     if (lainExtensionState === null) {
-        // localStorage.setItem(EXTENSION_STATE, APP_STATES.IDLE);
-        lainExtensionState = APP_STATES.START_TRACKING;
-        start();
+        localStorage.setItem(EXTENSION_STATE, APP_STATES.IDLE);
+    }
+
+    if (lainExtensionState === APP_STATES.IDLE) {
+        chrome.runtime.sendMessage({ greeting: "hello" }, (response) => {
+            const links = response.testLinks.links;
+            const formId = getFormId();
+
+            for (let i = 0; i < links.length; i++) {
+                if (links[i].includes(formId)) {
+                    start();
+                    break;
+                }
+            }
+        });
     }
     
     if (lainExtensionState === APP_STATES.START_TRACKING) {
         const testSessionId = getUserId();
         const formId = getFormId();
-
-        injectMouseListeners(testSessionId, formId);
-        abobaExtractor(testSessionId, formId);
-        sendForm(testSessionId, formId);
-        preClearForm(testSessionId, formId);
-        clearForm(testSessionId, formId);
+        injectAll(testSessionId, formId);
     }
 
     if (lainExtensionState === APP_STATES.STOP_TRACKING) {

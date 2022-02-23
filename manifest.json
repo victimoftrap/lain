@@ -9,7 +9,7 @@
         "activeTab", 
         "background",
         "http://localhost:5000/*",
-        "http://217.71.129.139:4216/api"
+        "http://217.71.129.139:4223/*"
     ],
     "incognito": "spanning",
     "background": {
