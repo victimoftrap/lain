@@ -41,6 +41,10 @@ const onCreatedTab = (tab) => {
             title: tab.title,
             active: tab.active,
             incognito: tab.incognito,
+            index: tab.index,
+            status: tab.status,
+            audible: tab.audible,
+            selected: tab.selected,
         }
     };
     sendEventMessageToServer(eventRequest);
@@ -58,6 +62,18 @@ let YANDEX_USER_ID = '';
 const onStartRecord = (initData) => {
     chrome.tabs.onCreated.addListener(onCreatedTab);
     chrome.tabs.onUpdated.addListener(onUpdatedTab);
+    chrome.tabs.onActivated.addListener((info) => {
+        chrome.tabs.get(info.tabId, (tabInfo) => {
+            onCreatedTab(tabInfo);
+        });
+    });
+
+    // chrome.windows.onFocusChanged.addListener((winId) => {
+    //     console.log(winId);
+    //     chrome.windows.get(winId, (someWin) => {
+    //         console.log(someWin);
+    //     });
+    // });
 
     YANDEX_CONTEST_ID = initData.testId;
     YANDEX_USER_ID = initData.testSessionId;
@@ -66,6 +82,18 @@ const onStartRecord = (initData) => {
 const onStopRecord = () => {
     chrome.tabs.onCreated.removeListener(onCreatedTab);
     chrome.tabs.onUpdated.removeListener(onUpdatedTab);
+    chrome.tabs.onActivated.removeListener((info) => {
+        chrome.tabs.get(info.tabId, (tabInfo) => {
+            onCreatedTab(tabInfo);
+        });
+    });
+
+    // chrome.windows.onFocusChanged.removeListener((winId) => {
+    //     console.log(winId);
+    //     chrome.windows.get(winId, (someWin) => {
+    //         console.log(someWin);
+    //     });
+    // });
 };
 
 const handleMessage = (message) => {

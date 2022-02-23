@@ -253,14 +253,15 @@ const formResponseLinks = () => {
 const checkAppState = () => {
     let testSessionId = getUserId();
 
-    const lisbethState = localStorage.getItem(EXTENSION_STATE);
-    if (lisbethState === null) {
+    let lainExtensionState = localStorage.getItem(EXTENSION_STATE);
+    if (lainExtensionState === null) {
         // localStorage.setItem(EXTENSION_STATE, APP_STATES.IDLE);
+        lainExtensionState = APP_STATES.START_TRACKING;
         localStorage.setItem(EXTENSION_STATE, APP_STATES.START_TRACKING);
         start();
     }
     
-    if (lisbethState === APP_STATES.START_TRACKING) {
+    if (lainExtensionState === APP_STATES.START_TRACKING) {
         const formId = getFormId();
 
         injectMouseListeners(testSessionId, formId);
@@ -270,8 +271,9 @@ const checkAppState = () => {
         clearForm(testSessionId, formId);
     }
 
-    if (lisbethState === APP_STATES.STOP_TRACKING) {
+    if (lainExtensionState === APP_STATES.STOP_TRACKING) {
         formResponseLinks();
+        lainExtensionState = APP_STATES.IDLE;
         localStorage.setItem(EXTENSION_STATE, APP_STATES.IDLE);
         stop();
     }
