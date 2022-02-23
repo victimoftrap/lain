@@ -4,6 +4,8 @@ import { USER_EVENTS } from './userEvents'
 import { nanoid } from 'nanoid'
 
 const EXTENSION_STATE = 'gforms-ets-state';
+const USER_SESSION_ID = 'testSessionId';
+
 let port = chrome.runtime.connect({ name: 'aboba-gforms' });
 
 const sendTrackingMessage = (testSessionId, testId, type, eventObj) => {
@@ -33,21 +35,6 @@ const injectMouseListeners = (testSessionId, testId) => {
             testId,
             USER_EVENTS.MOUSE_ENTER_EVENT,
             event
-        );
-    });
-};
-
-const disableMouseListeners = (testSessionId, testId) => {
-    const mainPage = document.getElementsByClassName('freebirdFormviewerViewFormContentWrapper')[0];
-    mainPage.removeEventListener('mouseleave', (event) => {
-        sendTrackingMessage(
-            testSessionId, testId, USER_EVENTS.MOUSE_LEAVE_EVENT, event
-        );
-    });
-
-    mainPage.removeEventListener('mouseenter', (event) => {
-        sendTrackingMessage(
-            testSessionId, testId, USER_EVENTS.MOUSE_ENTER_EVENT, event
         );
     });
 };
@@ -163,6 +150,7 @@ const abobaExtractor = (testSessionId, testId) => {
                 }
             }
 
+            // long + short text inputs
             if (taskTypeClassName.includes('freebirdFormviewerComponentsQuestionTextRoot')) {
                 const textareaTagAnswerInput = questionAnswersContainer.getElementsByTagName('textarea')[0];
                 const inputTagAnswerInput = questionAnswersContainer.getElementsByTagName('input')[0];
@@ -198,10 +186,10 @@ const abobaExtractor = (testSessionId, testId) => {
 };
 
 const getUserId = () => {
-    let testSessionId = localStorage.getItem('testSessionId');
+    let testSessionId = localStorage.getItem(USER_SESSION_ID);
     if (testSessionId === null) {
         const testSessionId = nanoid();
-        localStorage.setItem('testSessionId', testSessionId);
+        localStorage.setItem(USER_SESSION_ID, testSessionId);
     }
     return testSessionId;
 };
@@ -231,7 +219,7 @@ const stop = () => {
         type: APP_STATES.STOP_TRACKING,
     });
     localStorage.setItem(EXTENSION_STATE, APP_STATES.STOP_TRACKING);
-    localStorage.removeItem('testSessionId');
+    localStorage.removeItem(USER_SESSION_ID);
 };
 
 const formResponseLinks = () => {
@@ -251,17 +239,25 @@ const formResponseLinks = () => {
 }
 
 const checkAppState = () => {
-    let testSessionId = getUserId();
-
     let lainExtensionState = localStorage.getItem(EXTENSION_STATE);
+
+    const googleFormsPath = location.pathname.split('/');
+    if (googleFormsPath[googleFormsPath.length - 1] === 'closedform') {
+        if (lainExtensionState === APP_STATES.START_TRACKING) {
+            stop();
+        }
+        localStorage.setItem(EXTENSION_STATE, APP_STATES.IDLE);
+        return;
+    }
+
     if (lainExtensionState === null) {
         // localStorage.setItem(EXTENSION_STATE, APP_STATES.IDLE);
         lainExtensionState = APP_STATES.START_TRACKING;
-        localStorage.setItem(EXTENSION_STATE, APP_STATES.START_TRACKING);
         start();
     }
     
     if (lainExtensionState === APP_STATES.START_TRACKING) {
+        const testSessionId = getUserId();
         const formId = getFormId();
 
         injectMouseListeners(testSessionId, formId);
@@ -275,7 +271,6 @@ const checkAppState = () => {
         formResponseLinks();
         lainExtensionState = APP_STATES.IDLE;
         localStorage.setItem(EXTENSION_STATE, APP_STATES.IDLE);
-        stop();
     }
 };
 
