@@ -189,8 +189,9 @@ const abobaExtractor = (testSessionId, testId) => {
 
 const getUserId = () => {
     let testSessionId = localStorage.getItem(USER_SESSION_ID);
+    
     if (testSessionId === null) {
-        const testSessionId = nanoid();
+        testSessionId = nanoid();
         localStorage.setItem(USER_SESSION_ID, testSessionId);
     }
     return testSessionId;
@@ -252,8 +253,8 @@ const formResponseLinks = () => {
 const checkAppState = () => {
     let lainExtensionState = localStorage.getItem(EXTENSION_STATE);
 
-    const googleFormsPath = location.pathname.split('/');
-    if (googleFormsPath[googleFormsPath.length - 1] === 'closedform') {
+    const googleFormsPath = location.pathname;
+    if (googleFormsPath.includes('closedform')) {
         if (lainExtensionState === APP_STATES.START_TRACKING) {
             stop();
         }
@@ -286,7 +287,6 @@ const checkAppState = () => {
     }
 
     if (lainExtensionState === APP_STATES.STOP_TRACKING) {
-        formResponseLinks();
         lainExtensionState = APP_STATES.IDLE;
         localStorage.setItem(EXTENSION_STATE, APP_STATES.IDLE);
     }

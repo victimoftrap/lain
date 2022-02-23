@@ -58,24 +58,19 @@ const onUpdatedTab = (tabId, info, tab) => {
     }
 };
 
+const onSelectedTab = (info) => {
+    chrome.tabs.get(info.tabId, (tabInfo) => {
+        onCreatedTab(tabInfo);
+    });
+};
+
 let YANDEX_CONTEST_ID = '';
 let YANDEX_USER_ID = '';
 
 const onStartRecord = (initData) => {
     chrome.tabs.onCreated.addListener(onCreatedTab);
     chrome.tabs.onUpdated.addListener(onUpdatedTab);
-    chrome.tabs.onActivated.addListener((info) => {
-        chrome.tabs.get(info.tabId, (tabInfo) => {
-            onCreatedTab(tabInfo);
-        });
-    });
-
-    // chrome.windows.onFocusChanged.addListener((winId) => {
-    //     console.log(winId);
-    //     chrome.windows.get(winId, (someWin) => {
-    //         console.log(someWin);
-    //     });
-    // });
+    chrome.tabs.onActivated.addListener(onSelectedTab);
 
     YANDEX_CONTEST_ID = initData.testId;
     YANDEX_USER_ID = initData.testSessionId;
@@ -84,18 +79,7 @@ const onStartRecord = (initData) => {
 const onStopRecord = () => {
     chrome.tabs.onCreated.removeListener(onCreatedTab);
     chrome.tabs.onUpdated.removeListener(onUpdatedTab);
-    chrome.tabs.onActivated.removeListener((info) => {
-        chrome.tabs.get(info.tabId, (tabInfo) => {
-            onCreatedTab(tabInfo);
-        });
-    });
-
-    // chrome.windows.onFocusChanged.removeListener((winId) => {
-    //     console.log(winId);
-    //     chrome.windows.get(winId, (someWin) => {
-    //         console.log(someWin);
-    //     });
-    // });
+    chrome.tabs.onActivated.removeListener(onSelectedTab);
 };
 
 const handleMessage = (message) => {
@@ -111,10 +95,6 @@ const handleMessage = (message) => {
             break;
     }
 };
-
-chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    
-});
 
 const getTestLinks = async () => {
     const apiUrl = getServerUrl(false);
